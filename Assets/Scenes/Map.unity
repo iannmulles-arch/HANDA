@@ -6171,8 +6171,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0fedaa412a0da445af866a4b5147a36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
-  moveSpeed: 3.5
+  moveSpeed: 5
+  minMoveSpeed: 0.5
   gravity: -9.81
+  floodWater: {fileID: 1665873364}
   groundCheck: {fileID: 1725403189}
   groundDistance: 0.4
   groundMask:

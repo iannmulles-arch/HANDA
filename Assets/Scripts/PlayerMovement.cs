@@ -1,3 +1,4 @@
+
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
@@ -5,7 +6,11 @@ public class PlayerMovement : MonoBehaviour
 {
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
+    public float minMoveSpeed = 1.5f;
     public float gravity = -9.81f;
+
+    [Header("Flood Settings")]
+    public FloodBuoyancy floodWater;
 
     [Header("Ground Check")]
     public Transform groundCheck;
@@ -24,7 +29,6 @@ public class PlayerMovement : MonoBehaviour
         controller = GetComponent<CharacterController>();
         controls = new PlayerControls();
 
-        // Read Joystick or WASD
         controls.Gameplay.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
         controls.Gameplay.Move.canceled += ctx => moveInput = Vector2.zero;
     }
@@ -34,17 +38,40 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+        isGrounded = Physics.CheckSphere(
+            groundCheck.position,
+            groundDistance,
+            groundMask
+        );
 
         if (isGrounded && velocity.y < 0)
         {
-            velocity.y = -2f; 
+            velocity.y = -2f;
         }
 
-        Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
-        controller.Move(move * moveSpeed * Time.deltaTime);
+        float currentMoveSpeed = moveSpeed;
+
+if (floodWater != null)
+{
+    float floodProgress = floodWater.GetFloodProgress();
+
+    currentMoveSpeed = Mathf.Lerp(
+        moveSpeed,
+        minMoveSpeed,
+        Mathf.Pow(floodProgress, 0.5f)
+    );
+}
+        Vector3 move = transform.right * moveInput.x
+                     + transform.forward * moveInput.y;
+
+        controller.Move(move * currentMoveSpeed * Time.deltaTime);
 
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
+    }
+
+    void OnEnableControls()
+    {
+        controls.Enable();
     }
 }
